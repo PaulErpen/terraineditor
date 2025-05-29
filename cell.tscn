@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://efb3nrmeanbb"]
+[gd_scene load_steps=11 format=3 uid="uid://efb3nrmeanbb"]
 
 [ext_resource type="Script" path="res://cell.gd" id="1_4igua"]
 [ext_resource type="Shader" path="res://cell.gdshader" id="2_yphr4"]
+[ext_resource type="PackedScene" uid="uid://xqonh80jxl4i" path="res://camera/camera.tscn" id="3_hiest"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ilyhk"]
 
@@ -36,11 +37,10 @@ displacement_texture = SubResource("NoiseTexture2D_omgum")
 material_override = SubResource("ShaderMaterial_a8sli")
 mesh = SubResource("PlaneMesh_p0bd4")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.868709, 0.495322, 0, -0.495322, 0.868709, -0.287836, 2.55614, 3.11108)
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_c1k0s")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.998268, 0.058836, 0, -0.058836, 0.998268, 0, 2.21143, 0)
+
+[node name="Camera" parent="." instance=ExtResource("3_hiest")]

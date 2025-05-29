@@ -1,0 +1,35 @@
+[gd_scene load_steps=9 format=3 uid="uid://efb3nrmeanbb"]
+
+[ext_resource type="Script" path="res://cell.gd" id="1_4igua"]
+[ext_resource type="Shader" path="res://cell.gdshader" id="2_yphr4"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ilyhk"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_omgum"]
+noise = SubResource("FastNoiseLite_ilyhk")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_xah0u"]
+frequency = 0.0029
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3461n"]
+noise = SubResource("FastNoiseLite_xah0u")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_a8sli"]
+render_priority = 0
+shader = ExtResource("2_yphr4")
+shader_parameter/displacement_texture = SubResource("NoiseTexture2D_3461n")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_p0bd4"]
+subdivide_width = 16
+subdivide_depth = 16
+
+[node name="Cell" type="Node3D"]
+script = ExtResource("1_4igua")
+displacement_texture = SubResource("NoiseTexture2D_omgum")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("ShaderMaterial_a8sli")
+mesh = SubResource("PlaneMesh_p0bd4")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.624002, -0.158382, -0.765203, 0.108577, -0.952171, 0.285623, -0.773842, -0.261313, -0.57696, 0, 2.42016, -0.152335)

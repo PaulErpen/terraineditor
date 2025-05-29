@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://efb3nrmeanbb"]
+
+[ext_resource type="Script" path="res://cell_manager.gd" id="1_kx8yd"]
+[ext_resource type="PackedScene" uid="uid://dugfvyxyfh6if" path="res://cell/cell.tscn" id="2_hfdjy"]
+[ext_resource type="PackedScene" uid="uid://xqonh80jxl4i" path="res://camera/camera.tscn" id="3_t2kyh"]
+
+[sub_resource type="Environment" id="Environment_c1k0s"]
+ambient_light_color = Color(1, 1, 1, 1)
+
+[node name="CellManager" type="Node3D"]
+script = ExtResource("1_kx8yd")
+
+[node name="Cell" parent="." instance=ExtResource("2_hfdjy")]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_c1k0s")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.998268, 0.058836, 0, -0.058836, 0.998268, 0, 2.21143, 0)
+
+[node name="Camera" parent="." instance=ExtResource("3_t2kyh")]

@@ -1,0 +1,24 @@
+[gd_scene load_steps=6 format=3 uid="uid://dugfvyxyfh6if"]
+
+[ext_resource type="Shader" path="res://cell/cell.gdshader" id="1_1altc"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_xah0u"]
+frequency = 0.0021
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3461n"]
+normalize = false
+noise = SubResource("FastNoiseLite_xah0u")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_a8sli"]
+render_priority = 0
+shader = ExtResource("1_1altc")
+shader_parameter/normal_sample_scale = 0.02
+shader_parameter/displacement_texture = SubResource("NoiseTexture2D_3461n")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_p0bd4"]
+subdivide_width = 32
+subdivide_depth = 32
+
+[node name="Cell" type="MeshInstance3D"]
+material_override = SubResource("ShaderMaterial_a8sli")
+mesh = SubResource("PlaneMesh_p0bd4")

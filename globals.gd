@@ -1,8 +1,6 @@
-extends Node3D
+extends Node
 
-@export var cell_position: Vector2i = Vector2i()
-@export var displacement_texture: Texture
-
+signal create_new_cell(cell_position: Vector2i)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

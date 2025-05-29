@@ -1,26 +1,38 @@
 shader_type spatial;
 
 uniform sampler2D displacement_texture;
+uniform float normal_sample_scale = 0.02;
+
+varying vec3 normal_buff;
+
+float sample_height(vec2 uv) {
+	return texture(displacement_texture, clamp(uv, vec2(0.0), vec2(1.0))).r;
+}
+
+vec3 calculate_normal(vec2 uv) {
+	// Calculate the normal based on the height map.
+	float height_top = sample_height(uv + vec2(sin(0), cos(0)) * normal_sample_scale);
+	float height_right = sample_height(uv + vec2(sin(0.66 * PI), cos(0.66 * PI)) * normal_sample_scale);
+	float height_left = sample_height(uv + vec2(sin(1.33 * PI), cos(1.33 * PI)) * normal_sample_scale);
+
+	vec3 top = vec3(sin(0), height_top, cos(0));
+	vec3 right = vec3(sin(0.66 * PI), height_right, cos(0.66 * PI));
+	vec3 left = vec3(sin(1.33 * PI), height_left, cos(1.33 * PI));
+	vec3 normal = normalize(cross(right - top, left - top));
+	return normal;
+}
 
 void vertex() {
 	// Called for every vertex the material is visible on.
-	float height = texture(displacement_texture, UV).x;
+	float height = sample_height(UV);
 
 	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, VERTEX.y + height, VERTEX.z, 1.0);
 
-	vec2 texel_size = vec2(1.0 / 2.0, 1.0 / 2.0); // e.g., (1.0 / texture_width, 1.0 / texture_height)
-
-    float height_x = texture(displacement_texture, UV + vec2(0.07, 0.0)).r;
-    float height_y = texture(displacement_texture, UV + vec2(0.0, 0.07)).r;
-
-    float dx = height_x - height;
-    float dy = height_y - height;
-
-    NORMAL = normalize(vec3(-dx, 1.0, -dy));
+    NORMAL = calculate_normal(UV);
 }
 
 void fragment() {
-
+	// ALBEDO = normal_buff.rgb;
 }
 
 //void light() {

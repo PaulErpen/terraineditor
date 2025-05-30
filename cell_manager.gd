@@ -5,6 +5,7 @@ var cell_scene = preload("res://cell/cell.tscn")
 
 @onready var cells = { 0 : { 0: $Cell } }
 @onready var bursh_cursor = $BrushCursor
+@onready var cell_size: Vector2i = $Cell.mesh.size
 
 func neighbor_exists(x: int, y: int) -> bool:
 	if x in cells and cells[x] != null:
@@ -16,7 +17,7 @@ func spawn_handles_for_cell(current_cell: Node3D, x: int, y: int):
 	for neighbor in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, -1)]:
 		if not neighbor_exists(x + neighbor.x, y + neighbor.y):
 			var handle_instance: Node3D = handle_scene.instantiate()
-			handle_instance.transform.origin = Vector3(neighbor.x, 0, neighbor.y)
+			handle_instance.transform.origin = Vector3(neighbor.x * cell_size.x / 2.0, 0, neighbor.y * cell_size.y / 2.0)
 			handle_instance.transform = handle_instance.transform.looking_at( - Vector3(neighbor.x, 0, neighbor.y))
 			current_cell.add_child(handle_instance)
 			handle_instance.cell_position = Vector2i(x + neighbor.x, y + neighbor.y)
@@ -50,7 +51,7 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 	if cell_position.y in cells[cell_position.x]:
 		print_debug("Cell already exists at position: ", cell_position)
 	var new_cell: Node3D = cell_scene.instantiate()
-	new_cell.transform.origin = Vector3(cell_position.x * 2, 0.0, cell_position.y * 2)
+	new_cell.transform.origin = Vector3(cell_position.x * cell_size.x, 0.0, cell_position.y * cell_size.y)
 	cells[cell_position.x][cell_position.y] = new_cell
 	add_child(new_cell)
 	spawn_handles_for_cell(new_cell, cell_position.x, cell_position.y)

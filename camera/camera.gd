@@ -1,7 +1,9 @@
 extends Node3D
 
 @export var rotation_speed: float = 0.01
-@export var camera_speed: float = 1.0
+@export var camera_speed: float = 10.0
+@export var scroll_speed: float = 3.0
+@export var scroll_max: float = 100.0
 
 @onready var camera: Camera3D = $Gimbal/Camera3D
 @onready var gimbal: Node3D = $Gimbal
@@ -50,6 +52,6 @@ func _input(event: InputEvent) -> void:
 				get_parent_node_3d()._on_move_brush_curser(result.position)
 		
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_UP:
-		camera.position.z = clamp(camera.position.z - 0.1, 0.1, 10.0)
+		camera.position.z = clamp(camera.position.z - scroll_speed, 0.1, scroll_max)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		camera.position.z = clamp(camera.position.z + 0.1, 0.1, 10.0)
+		camera.position.z = clamp(camera.position.z + scroll_speed, 0.1, scroll_max)

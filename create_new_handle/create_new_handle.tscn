@@ -8,22 +8,22 @@ albedo_color = Color(1, 0, 0, 1)
 [sub_resource type="PrismMesh" id="PrismMesh_qn0b7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fc5ng"]
-size = Vector3(0.770996, 0.405334, 0.142578)
+size = Vector3(3.19678, 1.9695, 0.142578)
 
 [node name="CreateNewHandle" type="Node3D" groups=["create_new_handle"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.289632)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.34536)
 script = ExtResource("1_kg14t")
 
 [node name="Area3D" type="Area3D" parent="."]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D"]
-transform = Transform3D(0.73684, 0, 0, 0, -1.60811e-08, -0.0894373, 0, 0.367894, -3.90943e-09, 0, 0, 0.334324)
+transform = Transform3D(3.16991, 0, 0, 0, -8.28093e-08, -0.0894373, 0, 1.89446, -3.90943e-09, 0, 0, 1.42997)
 material_override = SubResource("StandardMaterial3D_ki5v1")
 mesh = SubResource("PrismMesh_qn0b7")
 skeleton = NodePath("../..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.0119629, 0.0136719, 0.340763)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0102539, 0.0136719, 1.46246)
 shape = SubResource("BoxShape3D_fc5ng")
 
 [connection signal="input_event" from="Area3D" to="." method="_on_area_3d_input_event"]

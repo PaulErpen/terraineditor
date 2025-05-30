@@ -1,5 +1,6 @@
 shader_type spatial;
 
+uniform float height_scale = 10.0;
 uniform sampler2D displacement_texture;
 uniform float normal_sample_scale = 0.02;
 
@@ -29,7 +30,7 @@ void vertex() {
 	// Called for every vertex the material is visible on.
 	float height = sample_height(UV);
 
-	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, VERTEX.y + height, VERTEX.z, 1.0);
+	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, VERTEX.y + height * height_scale, VERTEX.z, 1.0);
 
     NORMAL = calculate_normal(UV);
 }

@@ -14,7 +14,7 @@ func _process(delta: float) -> void:
 	if is_changed:
 		var heightmap_image: Image = material_override.get("shader_parameter/displacement_texture").get_image()
 		heightmap_image.convert(Image.FORMAT_RF)
-		heightmap_image.resize(8, 8)
+		heightmap_image.resize(17, 17)
 		var height_map_shape: HeightMapShape3D = collision_shape.shape
-		height_map_shape.update_map_data_from_image(heightmap_image, 0.1, 3.5)
+		height_map_shape.update_map_data_from_image(heightmap_image, 0.0, 10.0)
 		is_changed = false

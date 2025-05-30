@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dugfvyxyfh6if"]
+[gd_scene load_steps=8 format=3 uid="uid://dugfvyxyfh6if"]
 
 [ext_resource type="Shader" path="res://cell/cell.gdshader" id="1_1altc"]
+[ext_resource type="Script" path="res://cell/cell.gd" id="2_rcqrr"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xah0u"]
 frequency = 0.0021
@@ -19,6 +20,20 @@ shader_parameter/displacement_texture = SubResource("NoiseTexture2D_3461n")
 subdivide_width = 32
 subdivide_depth = 32
 
+[sub_resource type="HeightMapShape3D" id="HeightMapShape3D_thpho"]
+map_width = 8
+map_depth = 8
+map_data = PackedFloat32Array(2.04854, 1.94479, 2.11021, 1.79708, 1.45979, 1.47708, 1.54958, 1.40333, 2.29875, 2.33708, 2.40375, 2.1875, 1.73188, 1.90667, 1.66521, 1.08167, 2.14729, 2.44021, 2.42313, 2.21708, 2.16188, 2.12229, 1.42042, 1.17875, 2.36146, 2.32, 2.23396, 2.02729, 2.37979, 2.02021, 1.40896, 1.45708, 2.40104, 2.36271, 2.06813, 1.56708, 1.70208, 1.65833, 1.38979, 1.69688, 2.23438, 2.01917, 1.52063, 1.18708, 1.28417, 1.36208, 1.09417, 1.19896, 1.97417, 1.78417, 1.57917, 1.07125, 0.953958, 1.20208, 0.9975, 1.12917, 2.02771, 1.89917, 1.70833, 1.0875, 0.815833, 0.935, 0.952292, 1.28604)
+
 [node name="Cell" type="MeshInstance3D"]
 material_override = SubResource("ShaderMaterial_a8sli")
 mesh = SubResource("PlaneMesh_p0bd4")
+script = ExtResource("2_rcqrr")
+is_changed = false
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(0.285, 0, 0, 0, 0.285, 0, 0, 0, 0.285, 0, 0, 0)
+shape = SubResource("HeightMapShape3D_thpho")

@@ -4,6 +4,7 @@ var handle_scene = preload("res://create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://cell/cell.tscn")
 
 @onready var cells = { 0 : { 0: $Cell } }
+@onready var bursh_cursor = $BrushCursor
 
 func neighbor_exists(x: int, y: int) -> bool:
 	if x in cells and cells[x] != null:
@@ -54,3 +55,6 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 	add_child(new_cell)
 	spawn_handles_for_cell(new_cell, cell_position.x, cell_position.y)
 	clean_handles(cell_position.x, cell_position.y)
+
+func _on_move_brush_curser(brush_cursor_position: Vector3) -> void:
+	bursh_cursor.position = brush_cursor_position

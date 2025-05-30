@@ -6,7 +6,10 @@ uniform float normal_sample_scale = 0.02;
 varying vec3 normal_buff;
 
 float sample_height(vec2 uv) {
-	return texture(displacement_texture, clamp(uv, vec2(0.0), vec2(1.0))).r;
+	ivec2 texel_size = textureSize(displacement_texture, 0);
+	ivec2 texel_coord = ivec2(uv * vec2(texel_size));
+	texel_coord = clamp(texel_coord, ivec2(0), texel_size - ivec2(1));
+	return texelFetch(displacement_texture, texel_coord, 0).r;
 }
 
 vec3 calculate_normal(vec2 uv) {

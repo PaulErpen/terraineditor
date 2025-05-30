@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://efb3nrmeanbb"]
+[gd_scene load_steps=6 format=3 uid="uid://efb3nrmeanbb"]
 
 [ext_resource type="Script" path="res://cell_manager.gd" id="1_kx8yd"]
 [ext_resource type="PackedScene" uid="uid://dugfvyxyfh6if" path="res://cell/cell.tscn" id="2_hfdjy"]
 [ext_resource type="PackedScene" uid="uid://xqonh80jxl4i" path="res://camera/camera.tscn" id="3_t2kyh"]
+[ext_resource type="PackedScene" uid="uid://oxmracdod8nt" path="res://brush_cursor/brush_cursor.tscn" id="4_pqkbr"]
 
 [sub_resource type="Environment" id="Environment_c1k0s"]
 ambient_light_color = Color(1, 1, 1, 1)
@@ -19,3 +20,6 @@ environment = SubResource("Environment_c1k0s")
 transform = Transform3D(1, 0, 0, 0, 0.998268, 0.058836, 0, -0.058836, 0.998268, 0, 2.21143, 0)
 
 [node name="Camera" parent="." instance=ExtResource("3_t2kyh")]
+
+[node name="BrushCursor" parent="." instance=ExtResource("4_pqkbr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.564288, 0)

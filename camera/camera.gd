@@ -35,6 +35,19 @@ func _input(event: InputEvent) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
 			rotate_y(-event.relative.x * rotation_speed)
 			gimbal.rotate_x(-event.relative.y * rotation_speed)
+		else:
+			# cast a ray from the camera to the mouse position
+			var from: Vector3 = camera.project_ray_origin(event.position)
+			var to: Vector3 = from + camera.project_ray_normal(event.position) * 1000.0
+			var space_state = get_world_3d().direct_space_state
+			var ray_cast_params = PhysicsRayQueryParameters3D.create(
+				from, to
+			)
+			ray_cast_params.set_collide_with_areas(true)
+			ray_cast_params.set_collision_mask(2)
+			var result = space_state.intersect_ray(ray_cast_params)
+			if result:
+				get_parent_node_3d()._on_move_brush_curser(result.position)
 		
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_UP:
 		camera.position.z = clamp(camera.position.z - 0.1, 0.1, 10.0)

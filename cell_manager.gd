@@ -2,6 +2,8 @@ extends Node3D
 
 var handle_scene = preload("res://create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://cell/cell.tscn")
+var brush_image: Image = preload("res://brush/brush.png").get_image()
+var brush_size: float = 0.03
 
 @onready var cells = { 0 : { 0: $Cell } }
 @onready var bursh_cursor = $BrushCursor
@@ -39,6 +41,7 @@ func spawn_handles():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	brush_image.convert(Image.FORMAT_RF)
 	spawn_handles()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -59,3 +62,32 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 
 func _on_move_brush_curser(brush_cursor_position: Vector3) -> void:
 	bursh_cursor.position = brush_cursor_position
+
+func _on_change_height(height_change: float) -> void:
+	var x_index = int((abs(bursh_cursor.position.x) + cell_size.x * 0.5) / cell_size.x * sign(bursh_cursor.position.x))
+	var y_index = int((abs(bursh_cursor.position.z) + cell_size.y * 0.5) / cell_size.y * sign(bursh_cursor.position.z))
+	var current_cell: Node3D = cells[x_index][y_index]
+	current_cell.is_changed = true
+	var displacement_texure: Texture2D = current_cell.material_override.get("shader_parameter/displacement_texture")
+	var displacement_image: Image = displacement_texure.get_image()
+	var current_bursh = brush_image.duplicate()
+	current_bursh.resize(
+		int(brush_image.get_width() * brush_size),
+		int(brush_image.get_height() * brush_size)
+	)
+	# print(height_change / 100.0)
+	# brush_image.adjust_bcs(height_change, 1.0, 1.0)
+	var brush_vec = Vector2i(
+			int((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * displacement_image.get_width() - current_bursh.get_width() * 0.5),
+			int((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * displacement_image.get_height() - current_bursh.get_height() * 0.5)
+		)
+	print(brush_vec)
+	displacement_image.blit_rect(
+		current_bursh,
+		Rect2i(
+			0, 0, current_bursh.get_width(), current_bursh.get_height()
+		),
+		brush_vec
+	)
+	var new_texture = ImageTexture.create_from_image(displacement_image)
+	current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)

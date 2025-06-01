@@ -33,10 +33,12 @@ void vertex() {
 	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, VERTEX.y + height * height_scale, VERTEX.z, 1.0);
 
     NORMAL = calculate_normal(UV);
+
+	normal_buff = vec3(height);
 }
 
 void fragment() {
-	// ALBEDO = normal_buff.rgb;
+	ALBEDO = normal_buff.rgb;
 }
 
 //void light() {

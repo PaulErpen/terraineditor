@@ -1,22 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://dugfvyxyfh6if"]
+[gd_scene load_steps=6 format=3 uid="uid://dugfvyxyfh6if"]
 
 [ext_resource type="Shader" path="res://cell/cell.gdshader" id="1_1altc"]
 [ext_resource type="Script" path="res://cell/cell.gd" id="2_rcqrr"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_xah0u"]
-frequency = 0.0023
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3461n"]
-generate_mipmaps = false
-normalize = false
-noise = SubResource("FastNoiseLite_xah0u")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_a8sli"]
 render_priority = 0
 shader = ExtResource("1_1altc")
 shader_parameter/height_scale = 10.0
 shader_parameter/normal_sample_scale = 0.02
-shader_parameter/displacement_texture = SubResource("NoiseTexture2D_3461n")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_p0bd4"]
 size = Vector2(16, 16)
@@ -33,6 +24,7 @@ map_data = PackedFloat32Array(5.39216, 5.31854, 5.07125, 4.95556, 5.42766, 5.620
 material_override = SubResource("ShaderMaterial_a8sli")
 mesh = SubResource("PlaneMesh_p0bd4")
 script = ExtResource("2_rcqrr")
+displacement_resolution = null
 is_changed = false
 
 [node name="Area3D" type="Area3D" parent="."]

@@ -1,3 +1,4 @@
+@tool
 extends MeshInstance3D
 
 @export var displacement_resolution: Vector2i = Vector2i(16, 16)
@@ -5,7 +6,7 @@ extends MeshInstance3D
 @onready var collision_shape = $Area3D/CollisionShape3D
 
 func generate_flat_image() -> void:
-	var flat_image = Image.create_empty(displacement_resolution.x, displacement_resolution.y, false, Image.FORMAT_RF)
+	var flat_image = Image.create_empty(displacement_resolution.x + 1, displacement_resolution.y + 1, false, Image.FORMAT_RF)
 	var texture = ImageTexture.create_from_image(flat_image)
 	material_override.set("shader_parameter/displacement_texture", texture)
 

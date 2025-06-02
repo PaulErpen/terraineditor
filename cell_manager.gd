@@ -75,14 +75,14 @@ func get_cell_index_from_position(position: Vector3) -> Vector2i:
 	var y_index = int((abs(position.z) + cell_size.y * 0.5) / cell_size.y * sign(position.z))
 	return Vector2i(x_index, y_index)
 
-func paint_on_texture(cell_index: Vector2i, current_bursh: Image, brush_position: Vector2i) -> void:
+func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position: Vector2i) -> void:
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
-	displacement_image.blit_rect(
-		current_bursh,
+	displacement_image.blend_rect(
+		current_brush,
 		Rect2i(
-			0, 0, current_bursh.get_width(), current_bursh.get_height()
+			0, 0, current_brush.get_width(), current_brush.get_height()
 		),
 		brush_position
 	)

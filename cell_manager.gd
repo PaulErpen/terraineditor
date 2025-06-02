@@ -3,7 +3,7 @@ extends Node3D
 var handle_scene = preload("res://create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://cell/cell.tscn")
 var brush_image: Image = preload("res://brush/brush.png").get_image()
-var brush_size: float = 0.04
+var brush_size: float = 0.06
 
 @onready var cells = {0: {0: $Cell}}
 @onready var bursh_cursor = $BrushCursor
@@ -116,5 +116,24 @@ func _on_change_height(height_change: float) -> void:
 
 	paint_on_texture(cell_index, current_brush, brush_position)
 
-	if brush_position.x + current_brush.get_width() * 0.5 > displacement_image_bounds.x and cell_exists(cell_index.x + 1, cell_index.y):
-		pass
+	# collect other cells that need to be updated
+	var neighbors = [
+		Vector2i(cell_index.x + 1, cell_index.y),
+		Vector2i(cell_index.x - 1, cell_index.y),
+		Vector2i(cell_index.x, cell_index.y + 1),
+		Vector2i(cell_index.x, cell_index.y - 1),
+		Vector2i(cell_index.x + 1, cell_index.y + 1),
+		Vector2i(cell_index.x - 1, cell_index.y - 1),
+		Vector2i(cell_index.x + 1, cell_index.y - 1),
+		Vector2i(cell_index.x - 1, cell_index.y + 1)
+	]
+	for neighbor in neighbors:
+		if cell_exists(neighbor.x, neighbor.y):
+			paint_on_texture(
+				neighbor,
+				current_brush,
+				Vector2i(
+					brush_position.x - (neighbor.x - cell_index.x) * displacement_image_bounds.x,
+					brush_position.y - (neighbor.y - cell_index.y) * displacement_image_bounds.y
+				)
+			)

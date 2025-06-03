@@ -79,13 +79,19 @@ func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
-	displacement_image.blend_rect(
-		current_brush,
-		Rect2i(
-			0, 0, current_brush.get_width(), current_brush.get_height()
-		),
-		brush_position
+	print(brush_position)
+	
+	displacement_image.set_pixelv(
+		brush_position,
+		Color(1.0, 1.0, 1.0)
 	)
+	# displacement_image.blend_rect(
+	# 	current_brush,
+	# 	Rect2i(
+	# 		0, 0, current_brush.get_width(), current_brush.get_height()
+	# 	),
+	# 	brush_position
+	# )
 	var new_texture = ImageTexture.create_from_image(displacement_image)
 	current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)
 
@@ -104,14 +110,23 @@ func get_displacement_image(cell: Node3D) -> Image:
 	var displacement_image: Image = displacement_texure.get_image()
 	return displacement_image
 
+func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush_position: Vector2i, neighbor: Vector2i) -> bool:
+	var offset: Vector2i = Vector2i(
+		neighbor.x - current_cell_index.x,
+		neighbor.y - current_cell_index.y
+	)
+	if brush_position.x == 0:
+		return true
+	return false
+
 func _on_change_height(height_change: float) -> void:
 	var current_brush: Image = prepare_brush()
 
 	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
 
-	var brush_position = Vector2i(
-		int((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * displacement_image_bounds.x - current_brush.get_width() * 0.5) - cell_index.x * displacement_image_bounds.x,
-		int((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * displacement_image_bounds.y - current_brush.get_height() * 0.5) - cell_index.y * displacement_image_bounds.y
+	var brush_position: Vector2i = Vector2i(
+		round((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
+		round((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
 	)
 
 	paint_on_texture(cell_index, current_brush, brush_position)
@@ -128,12 +143,12 @@ func _on_change_height(height_change: float) -> void:
 		Vector2i(cell_index.x - 1, cell_index.y + 1)
 	]
 	for neighbor in neighbors:
-		if cell_exists(neighbor.x, neighbor.y):
+		if cell_exists(neighbor.x, neighbor.y) and brush_position_intersects_with_neighbor(cell_index, brush_position, neighbor):
 			paint_on_texture(
 				neighbor,
 				current_brush,
 				Vector2i(
-					brush_position.x - (neighbor.x - cell_index.x) * displacement_image_bounds.x,
-					brush_position.y - (neighbor.y - cell_index.y) * displacement_image_bounds.y
+					brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 1),
+					brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 1)
 				)
 			)

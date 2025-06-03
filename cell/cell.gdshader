@@ -8,8 +8,7 @@ varying vec3 normal_buff;
 
 float sample_height(vec2 uv) {
 	ivec2 texel_size = textureSize(displacement_texture, 0);
-	ivec2 texel_coord = ivec2(uv * vec2(texel_size - 1));
-	texel_coord = clamp(texel_coord, ivec2(0), texel_size - ivec2(1));
+	ivec2 texel_coord = ivec2(round(uv * vec2(texel_size - 1)));
 	return texelFetch(displacement_texture, texel_coord, 0).r;
 }
 

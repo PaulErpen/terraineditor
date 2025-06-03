@@ -22,8 +22,8 @@ func _ready() -> void:
 	)
 
 func cell_exists(x: int, y: int) -> bool:
-	if x in cells and cells[x] != null:
-		if y in cells[x] and cells[x][y] != null:
+	if cells.has(x) and cells[x] != null:
+		if cells[x].has(y) and cells[x][y] != null:
 			return true
 	return false
 
@@ -115,7 +115,9 @@ func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush
 		neighbor.x - current_cell_index.x,
 		neighbor.y - current_cell_index.y
 	)
-	if brush_position.x == 0:
+	if brush_position.x == 0 or brush_position.x == displacement_image_bounds.x - 1:
+		return true
+	if brush_position.y == 0 or brush_position.y == displacement_image_bounds.y - 1:
 		return true
 	return false
 
@@ -143,12 +145,13 @@ func _on_change_height(height_change: float) -> void:
 		Vector2i(cell_index.x - 1, cell_index.y + 1)
 	]
 	for neighbor in neighbors:
-		if cell_exists(neighbor.x, neighbor.y) and brush_position_intersects_with_neighbor(cell_index, brush_position, neighbor):
-			paint_on_texture(
-				neighbor,
-				current_brush,
-				Vector2i(
-					brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 1),
-					brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 1)
+		if cell_exists(neighbor.x, neighbor.y):
+			if brush_position_intersects_with_neighbor(cell_index, brush_position, neighbor):
+				paint_on_texture(
+					neighbor,
+					current_brush,
+					Vector2i(
+						brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 1),
+						brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 1)
+					)
 				)
-			)

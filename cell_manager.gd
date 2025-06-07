@@ -176,10 +176,15 @@ func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush
 		neighbor.x - current_cell_index.x,
 		neighbor.y - current_cell_index.y
 	)
-	if brush_position.x == 0 or brush_position.x == displacement_image_bounds.x - 1:
+	
+	var x_position = brush_position.x - offset.x * (displacement_image_bounds.x - 1)
+	if offset.x != 0 and (x_position == 0 or x_position == displacement_image_bounds.x - 1):
 		return true
-	if brush_position.y == 0 or brush_position.y == displacement_image_bounds.y - 1:
+		
+	var y_position = brush_position.y - offset.y * (displacement_image_bounds.y - 1)
+	if offset.y != 0 and (y_position == 0 or y_position == displacement_image_bounds.y - 1):
 		return true
+	
 	return false
 
 func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:

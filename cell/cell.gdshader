@@ -37,7 +37,7 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = normal_buff.rgb;
+	ALBEDO = (normal_buff.rgb + 1.0) / 2.0;
 }
 
 //void light() {

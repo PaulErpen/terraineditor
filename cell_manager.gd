@@ -66,6 +66,66 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 	add_child(new_cell)
 	spawn_handles_for_cell(new_cell, cell_position.x, cell_position.y)
 	clean_handles(cell_position.x, cell_position.y)
+	stich_seams(cell_position)
+
+func collect_pixels_from_neighbor_seam(neighbor_heightmap: Image, offset: Vector2i) -> Array[Dictionary]:
+	var collected_heights: Array[Dictionary] = []
+
+	if offset.x == 0:
+		for x in range(neighbor_heightmap.get_width()):
+			var pixel_color: Color = neighbor_heightmap.get_pixelv(Vector2i(x, 0 if offset.y > 0 else neighbor_heightmap.get_height() - 1))
+			collected_heights.append({
+				"position": Vector2i(x, 0 if offset.y < 0 else neighbor_heightmap.get_height() - 1),
+				"height": pixel_color.r
+			})
+	elif offset.y == 0:
+		for y in range(neighbor_heightmap.get_height()):
+			var pixel_color: Color = neighbor_heightmap.get_pixelv(Vector2i(0 if offset.x > 0 else neighbor_heightmap.get_width() - 1, y))
+			collected_heights.append({
+				"position": Vector2i(0 if offset.x < 0 else neighbor_heightmap.get_width() - 1, y),
+				"height": pixel_color.r
+			})
+	elif abs(offset.x) == abs(offset.y):
+		var pixel_color: Color = neighbor_heightmap.get_pixelv(Vector2i(
+			0 if offset.x < 0 else neighbor_heightmap.get_width() - 1, 
+			0 if offset.y < 0 else neighbor_heightmap.get_height() - 1))
+		collected_heights.append({
+			"position": Vector2i(0 if offset.x > 0 else neighbor_heightmap.get_width() - 1, 0 if offset.y > 0 else neighbor_heightmap.get_height() - 1),
+			"height": pixel_color.r
+		})
+	else:
+		print_debug("Unsupported offset for seam stitching: ", offset)
+	
+	return collected_heights
+
+
+func stich_seams(cell_position: Vector2i) -> void:
+	var collected_heights = []
+	
+	for neighbor in get_possible_neighbors(cell_position):
+		if cell_exists(neighbor.x, neighbor.y):
+			var current_neighbor: MeshInstance3D = cells[neighbor.x][neighbor.y]
+			var current_heightmap_texture: Image = get_displacement_image(current_neighbor)
+
+			var offset: Vector2i = Vector2i(
+				neighbor.x - cell_position.x,
+				neighbor.y - cell_position.y
+			)
+			var neighbor_heights = collect_pixels_from_neighbor_seam(current_heightmap_texture, offset)
+			for height_data in neighbor_heights:
+				if height_data.height != 0:
+					collected_heights.append(height_data)
+	
+	if collected_heights.size() > 0:
+		var current_cell: Node3D = cells[cell_position.x][cell_position.y]
+		var displacement_image: Image = get_displacement_image(current_cell)
+		
+		for height_data in collected_heights:
+			displacement_image.set_pixelv(height_data.position, Color(height_data.height, height_data.height, height_data.height))
+		
+		var new_texture = ImageTexture.create_from_image(displacement_image)
+		current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)
+		current_cell.is_changed = true
 
 func _on_move_brush_curser(brush_cursor_position: Vector3) -> void:
 	bursh_cursor.position = brush_cursor_position
@@ -75,15 +135,16 @@ func get_cell_index_from_position(position: Vector3) -> Vector2i:
 	var y_index = int((abs(position.z) + cell_size.y * 0.5) / cell_size.y * sign(position.z))
 	return Vector2i(x_index, y_index)
 
-func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position: Vector2i) -> void:
+func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position: Vector2i, height: float) -> void:
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
-	print(brush_position)
+	var current_height: float = displacement_image.get_pixelv(brush_position).r
+	# print(brush_position)
 	
 	displacement_image.set_pixelv(
 		brush_position,
-		Color(1.0, 1.0, 1.0)
+		Color(current_height + height, current_height + height, current_height + height)
 	)
 	# displacement_image.blend_rect(
 	# 	current_brush,
@@ -121,20 +182,8 @@ func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush
 		return true
 	return false
 
-func _on_change_height(height_change: float) -> void:
-	var current_brush: Image = prepare_brush()
-
-	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
-
-	var brush_position: Vector2i = Vector2i(
-		round((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
-		round((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
-	)
-
-	paint_on_texture(cell_index, current_brush, brush_position)
-
-	# collect other cells that need to be updated
-	var neighbors = [
+func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
+	return [
 		Vector2i(cell_index.x + 1, cell_index.y),
 		Vector2i(cell_index.x - 1, cell_index.y),
 		Vector2i(cell_index.x, cell_index.y + 1),
@@ -144,7 +193,23 @@ func _on_change_height(height_change: float) -> void:
 		Vector2i(cell_index.x + 1, cell_index.y - 1),
 		Vector2i(cell_index.x - 1, cell_index.y + 1)
 	]
-	for neighbor in neighbors:
+
+func _on_change_height(height_change: float) -> void:
+	var current_brush: Image = prepare_brush()
+
+	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
+
+	var brush_position: Vector2i = Vector2i(
+		round((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
+		round((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
+	)
+	
+	var height: float = abs(height_change) / 50.0 * -1 * sign(height_change)
+	print(height)
+
+	paint_on_texture(cell_index, current_brush, brush_position, height)
+
+	for neighbor in get_possible_neighbors(cell_index):
 		if cell_exists(neighbor.x, neighbor.y):
 			if brush_position_intersects_with_neighbor(cell_index, brush_position, neighbor):
 				paint_on_texture(
@@ -153,5 +218,6 @@ func _on_change_height(height_change: float) -> void:
 					Vector2i(
 						brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 1),
 						brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 1)
-					)
+					),
+					height
 				)

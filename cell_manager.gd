@@ -68,6 +68,19 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 	clean_handles(cell_position.x, cell_position.y)
 	stich_seams(cell_position)
 
+func get_corner_coords_from_offset(offset: Vector2i) -> Vector2i:
+	if offset.x > 0 and offset.y > 0:
+		return Vector2i(0, 0)
+	elif offset.x < 0 and offset.y < 0:
+		return Vector2i(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
+	elif offset.x > 0 and offset.y < 0:
+		return Vector2i(0, displacement_image_bounds.y - 1)
+	elif offset.x < 0 and offset.y > 0:
+		return Vector2i(displacement_image_bounds.x - 1-1, 0)
+	else:
+		print_debug("Unsupported offset for corner coords: ", offset)
+		return Vector2i(0, 0)
+
 func collect_pixels_from_neighbor_seam(neighbor_heightmap: Image, offset: Vector2i) -> Array[Dictionary]:
 	var collected_heights: Array[Dictionary] = []
 
@@ -85,12 +98,11 @@ func collect_pixels_from_neighbor_seam(neighbor_heightmap: Image, offset: Vector
 				"position": Vector2i(0 if offset.x < 0 else neighbor_heightmap.get_width() - 1, y),
 				"height": pixel_color.r
 			})
-	elif abs(offset.x) == abs(offset.y):
-		var pixel_color: Color = neighbor_heightmap.get_pixelv(Vector2i(
-			0 if offset.x < 0 else neighbor_heightmap.get_width() - 1, 
-			0 if offset.y < 0 else neighbor_heightmap.get_height() - 1))
+	elif offset.x != 0 and offset.y != 0:
+		var corner_coords = get_corner_coords_from_offset(offset)
+		var pixel_color: Color = neighbor_heightmap.get_pixelv(corner_coords)
 		collected_heights.append({
-			"position": Vector2i(0 if offset.x > 0 else neighbor_heightmap.get_width() - 1, 0 if offset.y > 0 else neighbor_heightmap.get_height() - 1),
+			"position": Vector2i(neighbor_heightmap.get_width() - 1 - corner_coords.x, neighbor_heightmap.get_height() - 1 - corner_coords.y),
 			"height": pixel_color.r
 		})
 	else:

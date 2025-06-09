@@ -1,5 +1,7 @@
 extends Node3D
 
+@export var brush_radius: float = 1.0
+
 var handle_scene = preload("res://create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://cell/cell.tscn")
 var brush_image: Image = preload("res://brush/brush.png").get_image()
@@ -147,17 +149,46 @@ func get_cell_index_from_position(position: Vector3) -> Vector2i:
 	var y_index = int((abs(position.z) + cell_size.y * 0.5) / cell_size.y * sign(position.z))
 	return Vector2i(x_index, y_index)
 
+func get_rect_by_radius(brush_position: Vector2i) -> Rect2:
+	var cell_rect = Rect2(
+		0,
+		0,
+		displacement_image_bounds.x - 1,
+		displacement_image_bounds.y - 1
+	)
+	var brush_rect = Rect2(
+		brush_position.x - brush_radius,
+		brush_position.y - brush_radius,
+		brush_radius * 2,
+		brush_radius * 2
+	)
+	return cell_rect.intersection(brush_rect)
+
 func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position: Vector2i, height: float) -> void:
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
-	var current_height: float = displacement_image.get_pixelv(brush_position).r
+
+	var rect: Rect2 = get_rect_by_radius(brush_position)
+
+	if not rect.has_area():
+		print_debug("Brush position is out of bounds: ", brush_position, " for cell index: ", cell_index, " rect = ", rect)
+		return
+
+	for x in range(floor(rect.position.x), ceil(rect.position.x + rect.size.x)):
+		for y in range(floor(rect.position.y), ceil(rect.position.y + rect.size.y)):
+			if x < 0 or x >= displacement_image_bounds.x or y < 0 or y >= displacement_image_bounds.y:
+				continue
+			var current_height: float = displacement_image.get_pixelv(Vector2i(x, y)).r
+			displacement_image.set_pixelv(Vector2i(x, y), Color(current_height + height, current_height + height, current_height + height))
+
+	#  current_height: float = displacement_image.get_pixelv(brush_position).r
 	# print(brush_position)
 	
-	displacement_image.set_pixelv(
-		brush_position,
-		Color(current_height + height, current_height + height, current_height + height)
-	)
+	# displacement_image.set_pixelv(
+	# 	brush_position,
+	# 	Color(current_height + height, current_height + height, current_height + height)
+	# )
 	# displacement_image.blend_rect(
 	# 	current_brush,
 	# 	Rect2i(
@@ -183,21 +214,35 @@ func get_displacement_image(cell: Node3D) -> Image:
 	var displacement_image: Image = displacement_texure.get_image()
 	return displacement_image
 
+func get_closest_point_by_offset(brush_position: Vector2i, offset: Vector2i) -> Vector2:
+	if offset.x == 0:
+		return Vector2(brush_position.x, 0 if offset.y < 0 else displacement_image_bounds.y - 1)
+	elif offset.y == 0:
+		return Vector2(0 if offset.x < 0 else displacement_image_bounds.x - 1, brush_position.y)
+	elif offset.x != 0 and offset.y != 0:
+		var corner_coords = get_corner_coords_from_offset(offset)
+		return Vector2(displacement_image_bounds.x - 1 - corner_coords.x, displacement_image_bounds.y - 1 - corner_coords.y)
+	else:
+		print_debug("Unsupported offset for closest point calculation: ", offset)
+		return Vector2(0, 0)
+
 func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush_position: Vector2i, neighbor: Vector2i) -> bool:
 	var offset: Vector2i = Vector2i(
 		neighbor.x - current_cell_index.x,
 		neighbor.y - current_cell_index.y
 	)
-	
-	var x_position = brush_position.x - offset.x * (displacement_image_bounds.x - 1)
-	if offset.x != 0 and (x_position == 0 or x_position == displacement_image_bounds.x - 1):
+	var closest_point: Vector2 = get_closest_point_by_offset(brush_position, offset)
+
+	var distance: float = closest_point.distance_to(brush_position)
+
+	# print(distance)
+
+	if distance <= brush_radius:
 		return true
-		
-	var y_position = brush_position.y - offset.y * (displacement_image_bounds.y - 1)
-	if offset.y != 0 and (y_position == 0 or y_position == displacement_image_bounds.y - 1):
-		return true
-	
+
 	return false
+
+	
 
 func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
 	return [
@@ -222,7 +267,6 @@ func _on_change_height(height_change: float) -> void:
 	)
 	
 	var height: float = abs(height_change) / 50.0 * -1 * sign(height_change)
-	print(height)
 
 	paint_on_texture(cell_index, current_brush, brush_position, height)
 

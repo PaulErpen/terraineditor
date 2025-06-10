@@ -113,8 +113,7 @@ func get_rect_by_radius(brush_position: Vector2i) -> InclusiveRect:
 		Vector2(brush_position.x - brush_radius, brush_position.y - brush_radius),
 		Vector2(brush_radius * 2, brush_radius * 2)
 	)
-	return cell_rect.intersection(brush_rect) # this needs to be fixed. even a 0 width/height rect is valid and should yield a single index for painting
-	# only negative rect sizes should be discarded
+	return cell_rect.intersection(brush_rect)
 
 func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: float) -> void:
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
@@ -130,20 +129,6 @@ func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: fl
 			var current_height: float = displacement_image.get_pixelv(Vector2i(x, y)).r
 			displacement_image.set_pixelv(Vector2i(x, y), Color(current_height + height, current_height + height, current_height + height))
 
-	#  current_height: float = displacement_image.get_pixelv(brush_position).r
-	# print(brush_position)
-	
-	# displacement_image.set_pixelv(
-	# 	brush_position,
-	# 	Color(current_height + height, current_height + height, current_height + height)
-	# )
-	# displacement_image.blend_rect(
-	# 	current_brush,
-	# 	Rect2i(
-	# 		0, 0, current_brush.get_width(), current_brush.get_height()
-	# 	),
-	# 	brush_position
-	# )
 	var new_texture = ImageTexture.create_from_image(displacement_image)
 	current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)
 
@@ -172,8 +157,6 @@ func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush
 	var closest_point: Vector2 = get_closest_point_by_offset(brush_position, offset)
 
 	var distance: float = closest_point.distance_to(brush_position)
-
-	# print(distance)
 
 	if distance <= brush_radius:
 		return true

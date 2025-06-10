@@ -1,31 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://efb3nrmeanbb"]
+[gd_scene load_steps=3 format=3 uid="uid://efb3nrmeanbb"]
 
 [ext_resource type="Script" path="res://scenes/cell_manager/cell_manager.gd" id="1_kx8yd"]
-[ext_resource type="PackedScene" uid="uid://xqonh80jxl4i" path="res://scenes/camera/camera.tscn" id="3_t2kyh"]
 [ext_resource type="PackedScene" uid="uid://oxmracdod8nt" path="res://scenes/brush_cursor/brush_cursor.tscn" id="4_pqkbr"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_s4a3r"]
-
-[sub_resource type="Sky" id="Sky_4iukk"]
-sky_material = SubResource("ProceduralSkyMaterial_s4a3r")
-
-[sub_resource type="Environment" id="Environment_c1k0s"]
-background_mode = 2
-background_color = Color(0.758192, 0.758192, 0.758192, 1)
-sky = SubResource("Sky_4iukk")
-ambient_light_source = 3
-ambient_light_color = Color(1, 1, 1, 1)
 
 [node name="CellManager" type="Node3D"]
 script = ExtResource("1_kx8yd")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_c1k0s")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.998268, 0.058836, 0, -0.058836, 0.998268, 0, 2.21143, 0)
-
-[node name="Camera" parent="." instance=ExtResource("3_t2kyh")]
 
 [node name="BrushCursor" parent="." instance=ExtResource("4_pqkbr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.564288, 0)

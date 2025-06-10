@@ -1,21 +1,23 @@
 extends Node3D
 
+class_name CellManager
+
 @export var brush_radius: float = 3.0
 
 var handle_scene = preload("res://scenes/create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://scenes/cell/cell.tscn")
 
-@onready var cells = {}
-@onready var bursh_cursor = $BrushCursor
+var cells = {}
+@onready var brush_cursor = $BrushCursor
 var cell_size: Vector2i
 var displacement_image_bounds: Vector2i
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	var center_cell = cell_scene.instantiate()
 	cells[0] = {
-		0: cell_scene.instantiate()
+		0: center_cell
 	}
-	var center_cell = cells[0][0]
 	add_child(center_cell)
 	cell_size = center_cell.mesh.size
 	spawn_handles()
@@ -107,7 +109,7 @@ func stitch_seams(cell_position: Vector2i) -> void:
 		current_cell.is_changed = true
 
 func _on_move_brush_curser(brush_cursor_position: Vector3) -> void:
-	bursh_cursor.position = brush_cursor_position
+	brush_cursor.position = brush_cursor_position
 
 func get_cell_index_from_position(_position: Vector3) -> Vector2i:
 	var x_index = int((abs(_position.x) + cell_size.x * 0.5) / cell_size.x * sign(_position.x))
@@ -190,12 +192,18 @@ func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
 
 func compute_brush_position_int(cell_index: Vector2i) -> Vector2i:
 	return Vector2i(
-		round((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
-		round((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
+		round((brush_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
+		round((brush_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
 	)
 
-func _on_change_height(height_change: float) -> void:
-	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
+func move_brush_cursor(brush_cursor_pos: Vector3) -> void:
+	brush_cursor.position = brush_cursor_pos
+
+func change_brush_radius(radius_change) -> void:
+	brush_radius = clamp(brush_radius + radius_change, 0.1, displacement_image_bounds.x - 1)
+
+func change_height(height_change: float) -> void:
+	var cell_index: Vector2i = get_cell_index_from_position(brush_cursor.position)
 
 	var brush_position: Vector2i = compute_brush_position_int(cell_index)
 	

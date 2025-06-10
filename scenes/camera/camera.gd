@@ -1,5 +1,9 @@
 extends Node3D
 
+signal change_height(height_change: float)
+signal change_brush_radius(radius_change: float)
+signal move_brush_cursor(brush_cursor_pos: Vector3)
+
 @export var rotation_speed: float = 0.01
 @export var camera_speed: float = 10.0
 @export var scroll_speed: float = 3.0
@@ -38,10 +42,9 @@ func _input(event: InputEvent) -> void:
 			rotate_y(-event.relative.x * rotation_speed)
 			gimbal.rotate_x(-event.relative.y * rotation_speed)
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			get_parent_node_3d()._on_change_height(event.relative.y)
+			change_height.emit(event.relative.y)
 		elif Input.is_action_pressed("resize_brush"):
-			var cell_manager = get_parent_node_3d()
-			cell_manager.brush_radius = clamp(cell_manager.brush_radius + event.relative.y * 0.01, 0.1, cell_manager.displacement_image_bounds.x - 1)
+			change_brush_radius.emit(event.relative.y * 0.01)
 		else:
 			# cast a ray from the camera to the mouse position
 			var from: Vector3 = camera.project_ray_origin(event.position)
@@ -54,7 +57,7 @@ func _input(event: InputEvent) -> void:
 			ray_cast_params.set_collision_mask(2)
 			var result = space_state.intersect_ray(ray_cast_params)
 			if result:
-				get_parent_node_3d()._on_move_brush_curser(result.position)
+				move_brush_cursor.emit(result.position)
 		
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_UP:
 		camera.position.z = clamp(camera.position.z - scroll_speed, 0.1, scroll_max)

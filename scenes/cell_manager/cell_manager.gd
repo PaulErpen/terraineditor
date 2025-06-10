@@ -1,10 +1,9 @@
 extends Node3D
 
-@export var brush_radius: float = 1.0
+@export var brush_radius: float = 3.0
 
 var handle_scene = preload("res://scenes/create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://scenes/cell/cell.tscn")
-var brush_size: float = 0.06
 
 @onready var cells = {0: {0: $Cell}}
 @onready var bursh_cursor = $BrushCursor
@@ -127,7 +126,9 @@ func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: fl
 			if x < 0 or x >= displacement_image_bounds.x or y < 0 or y >= displacement_image_bounds.y:
 				continue
 			var current_height: float = displacement_image.get_pixelv(Vector2i(x, y)).r
-			displacement_image.set_pixelv(Vector2i(x, y), Color(current_height + height, current_height + height, current_height + height))
+			var influence: float = max(0.01, 1.0 - (Vector2(x, y).distance_to(brush_position) / brush_radius))
+			var new_height: float = current_height + height * influence
+			displacement_image.set_pixelv(Vector2i(x, y), Color(new_height, new_height, new_height))
 
 	var new_texture = ImageTexture.create_from_image(displacement_image)
 	current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)

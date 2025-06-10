@@ -104,18 +104,14 @@ func get_cell_index_from_position(_position: Vector3) -> Vector2i:
 	var y_index = int((abs(_position.z) + cell_size.y * 0.5) / cell_size.y * sign(_position.z))
 	return Vector2i(x_index, y_index)
 
-func get_rect_by_radius(brush_position: Vector2i) -> Rect2:
-	var cell_rect = Rect2(
-		0,
-		0,
-		displacement_image_bounds.x - 1,
-		displacement_image_bounds.y - 1
+func get_rect_by_radius(brush_position: Vector2i) -> InclusiveRect:
+	var cell_rect = InclusiveRect.create(
+		Vector2(0, 0),
+		Vector2(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
 	)
-	var brush_rect = Rect2(
-		brush_position.x - brush_radius,
-		brush_position.y - brush_radius,
-		brush_radius * 2,
-		brush_radius * 2
+	var brush_rect = InclusiveRect.create(
+		Vector2(brush_position.x - brush_radius, brush_position.y - brush_radius),
+		Vector2(brush_radius * 2, brush_radius * 2)
 	)
 	return cell_rect.intersection(brush_rect) # this needs to be fixed. even a 0 width/height rect is valid and should yield a single index for painting
 	# only negative rect sizes should be discarded
@@ -125,7 +121,7 @@ func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: fl
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
 
-	var rect: Rect2 = get_rect_by_radius(brush_position)
+	var rect: InclusiveRect = get_rect_by_radius(brush_position)
 
 	for x in range(floor(rect.position.x), ceil(rect.position.x + rect.size.x) + 1):
 		for y in range(floor(rect.position.y), ceil(rect.position.y + rect.size.y) + 1):
@@ -185,7 +181,6 @@ func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush
 	return false
 
 	
-
 func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
 	return [
 		Vector2i(cell_index.x + 1, cell_index.y),

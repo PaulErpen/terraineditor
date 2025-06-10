@@ -39,6 +39,9 @@ func _input(event: InputEvent) -> void:
 			gimbal.rotate_x(-event.relative.y * rotation_speed)
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			get_parent_node_3d()._on_change_height(event.relative.y)
+		elif Input.is_action_pressed("resize_brush"):
+			var cell_manager = get_parent_node_3d()
+			cell_manager.brush_radius = clamp(cell_manager.brush_radius + event.relative.y * 0.01, 0.1, cell_manager.displacement_image_bounds.x - 1)
 		else:
 			# cast a ray from the camera to the mouse position
 			var from: Vector3 = camera.project_ray_origin(event.position)

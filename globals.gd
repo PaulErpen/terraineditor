@@ -1,6 +1,7 @@
 extends Node
 
-signal create_new_cell(cell_position: Vector2i)
+# Add global variables or signals here
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

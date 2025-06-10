@@ -65,9 +65,9 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 	add_child(new_cell)
 	spawn_handles_for_cell(new_cell, cell_position.x, cell_position.y)
 	clean_handles(cell_position.x, cell_position.y)
-	stich_seams(cell_position)
+	stitch_seams(cell_position)
 
-func stich_seams(cell_position: Vector2i) -> void:
+func stitch_seams(cell_position: Vector2i) -> void:
 	var collected_heights = []
 	
 	for neighbor in get_possible_neighbors(cell_position):
@@ -189,7 +189,9 @@ func _on_change_height(height_change: float) -> void:
 
 	paint_on_texture(cell_index, brush_position, height)
 
-	for neighbor in get_possible_neighbors(cell_index):
+	var neighbors = get_possible_neighbors(cell_index)
+
+	for neighbor in neighbors:
 		if cell_exists(neighbor.x, neighbor.y):
 			if brush_position_intersects_with_neighbor(cell_index, brush_position, neighbor):
 				paint_on_texture(
@@ -200,3 +202,9 @@ func _on_change_height(height_change: float) -> void:
 					),
 					height
 				)
+
+	stitch_seams(cell_index)
+
+	for neighbor in neighbors:
+		if cell_exists(neighbor.x, neighbor.y):
+			stitch_seams(neighbor)

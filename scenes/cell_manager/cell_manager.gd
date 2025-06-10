@@ -2,9 +2,8 @@ extends Node3D
 
 @export var brush_radius: float = 1.0
 
-var handle_scene = preload("res://create_new_handle/create_new_handle.tscn")
-var cell_scene = preload("res://cell/cell.tscn")
-var brush_image: Image = preload("res://brush/brush.png").get_image()
+var handle_scene = preload("res://scenes/create_new_handle/create_new_handle.tscn")
+var cell_scene = preload("res://scenes/cell/cell.tscn")
 var brush_size: float = 0.06
 
 @onready var cells = {0: {0: $Cell}}
@@ -14,7 +13,6 @@ var displacement_image_bounds: Vector2i
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	brush_image.convert(Image.FORMAT_RF)
 	spawn_handles()
 	var some_cell = cells[0][0]
 	var displacement_image = get_displacement_image(some_cell)
@@ -54,7 +52,7 @@ func spawn_handles():
 			spawn_handles_for_cell(current_cell, x, y)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 
 func _on_create_new_cell(cell_position: Vector2i) -> void:
@@ -70,49 +68,6 @@ func _on_create_new_cell(cell_position: Vector2i) -> void:
 	clean_handles(cell_position.x, cell_position.y)
 	stich_seams(cell_position)
 
-func get_corner_coords_from_offset(offset: Vector2i) -> Vector2i:
-	if offset.x > 0 and offset.y > 0:
-		return Vector2i(0, 0)
-	elif offset.x < 0 and offset.y < 0:
-		return Vector2i(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
-	elif offset.x > 0 and offset.y < 0:
-		return Vector2i(0, displacement_image_bounds.y - 1)
-	elif offset.x < 0 and offset.y > 0:
-		return Vector2i(displacement_image_bounds.x - 1-1, 0)
-	else:
-		print_debug("Unsupported offset for corner coords: ", offset)
-		return Vector2i(0, 0)
-
-func collect_pixels_from_neighbor_seam(neighbor_heightmap: Image, offset: Vector2i) -> Array[Dictionary]:
-	var collected_heights: Array[Dictionary] = []
-
-	if offset.x == 0:
-		for x in range(neighbor_heightmap.get_width()):
-			var pixel_color: Color = neighbor_heightmap.get_pixelv(Vector2i(x, 0 if offset.y > 0 else neighbor_heightmap.get_height() - 1))
-			collected_heights.append({
-				"position": Vector2i(x, 0 if offset.y < 0 else neighbor_heightmap.get_height() - 1),
-				"height": pixel_color.r
-			})
-	elif offset.y == 0:
-		for y in range(neighbor_heightmap.get_height()):
-			var pixel_color: Color = neighbor_heightmap.get_pixelv(Vector2i(0 if offset.x > 0 else neighbor_heightmap.get_width() - 1, y))
-			collected_heights.append({
-				"position": Vector2i(0 if offset.x < 0 else neighbor_heightmap.get_width() - 1, y),
-				"height": pixel_color.r
-			})
-	elif offset.x != 0 and offset.y != 0:
-		var corner_coords = get_corner_coords_from_offset(offset)
-		var pixel_color: Color = neighbor_heightmap.get_pixelv(corner_coords)
-		collected_heights.append({
-			"position": Vector2i(neighbor_heightmap.get_width() - 1 - corner_coords.x, neighbor_heightmap.get_height() - 1 - corner_coords.y),
-			"height": pixel_color.r
-		})
-	else:
-		print_debug("Unsupported offset for seam stitching: ", offset)
-	
-	return collected_heights
-
-
 func stich_seams(cell_position: Vector2i) -> void:
 	var collected_heights = []
 	
@@ -125,7 +80,7 @@ func stich_seams(cell_position: Vector2i) -> void:
 				neighbor.x - cell_position.x,
 				neighbor.y - cell_position.y
 			)
-			var neighbor_heights = collect_pixels_from_neighbor_seam(current_heightmap_texture, offset)
+			var neighbor_heights = HeightPixel.collect_pixels_from_neighbor_seam(current_heightmap_texture, offset)
 			for height_data in neighbor_heights:
 				if height_data.height != 0:
 					collected_heights.append(height_data)
@@ -144,9 +99,9 @@ func stich_seams(cell_position: Vector2i) -> void:
 func _on_move_brush_curser(brush_cursor_position: Vector3) -> void:
 	bursh_cursor.position = brush_cursor_position
 
-func get_cell_index_from_position(position: Vector3) -> Vector2i:
-	var x_index = int((abs(position.x) + cell_size.x * 0.5) / cell_size.x * sign(position.x))
-	var y_index = int((abs(position.z) + cell_size.y * 0.5) / cell_size.y * sign(position.z))
+func get_cell_index_from_position(_position: Vector3) -> Vector2i:
+	var x_index = int((abs(_position.x) + cell_size.x * 0.5) / cell_size.x * sign(_position.x))
+	var y_index = int((abs(_position.z) + cell_size.y * 0.5) / cell_size.y * sign(_position.z))
 	return Vector2i(x_index, y_index)
 
 func get_rect_by_radius(brush_position: Vector2i) -> Rect2:
@@ -165,7 +120,7 @@ func get_rect_by_radius(brush_position: Vector2i) -> Rect2:
 	return cell_rect.intersection(brush_rect) # this needs to be fixed. even a 0 width/height rect is valid and should yield a single index for painting
 	# only negative rect sizes should be discarded
 
-func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position: Vector2i, height: float) -> void:
+func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: float) -> void:
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
@@ -196,16 +151,6 @@ func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position
 	var new_texture = ImageTexture.create_from_image(displacement_image)
 	current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)
 
-func prepare_brush() -> Image:
-	var current_brush: Image = brush_image.duplicate()
-	current_brush.resize(
-		int(brush_image.get_width() * brush_size),
-		int(brush_image.get_height() * brush_size)
-	)
-	# print(height_change / 100.0)
-	# brush_image.adjust_bcs(height_change, 1.0, 1.0)
-	return current_brush
-
 func get_displacement_image(cell: Node3D) -> Image:
 	var displacement_texure: Texture2D = cell.material_override.get("shader_parameter/displacement_texture")
 	var displacement_image: Image = displacement_texure.get_image()
@@ -217,7 +162,7 @@ func get_closest_point_by_offset(brush_position: Vector2i, offset: Vector2i) -> 
 	elif offset.y == 0:
 		return Vector2(0 if offset.x < 0 else displacement_image_bounds.x - 1, brush_position.y)
 	elif offset.x != 0 and offset.y != 0:
-		var corner_coords = get_corner_coords_from_offset(offset)
+		var corner_coords = GeometryUtil.get_corner_coords_from_offset(offset, displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
 		return Vector2(displacement_image_bounds.x - 1 - corner_coords.x, displacement_image_bounds.y - 1 - corner_coords.y)
 	else:
 		print_debug("Unsupported offset for closest point calculation: ", offset)
@@ -254,8 +199,6 @@ func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
 	]
 
 func _on_change_height(height_change: float) -> void:
-	var current_brush: Image = prepare_brush()
-
 	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
 
 	var brush_position: Vector2i = Vector2i(
@@ -265,14 +208,13 @@ func _on_change_height(height_change: float) -> void:
 	
 	var height: float = abs(height_change) / 50.0 * -1 * sign(height_change)
 
-	paint_on_texture(cell_index, current_brush, brush_position, height)
+	paint_on_texture(cell_index, brush_position, height)
 
 	for neighbor in get_possible_neighbors(cell_index):
 		if cell_exists(neighbor.x, neighbor.y):
 			if brush_position_intersects_with_neighbor(cell_index, brush_position, neighbor):
 				paint_on_texture(
 					neighbor,
-					current_brush,
 					Vector2i(
 						brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 1),
 						brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 1)

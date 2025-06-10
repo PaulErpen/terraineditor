@@ -5,16 +5,21 @@ extends Node3D
 var handle_scene = preload("res://scenes/create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://scenes/cell/cell.tscn")
 
-@onready var cells = {0: {0: $Cell}}
+@onready var cells = {}
 @onready var bursh_cursor = $BrushCursor
-@onready var cell_size: Vector2i = $Cell.mesh.size
+var cell_size: Vector2i
 var displacement_image_bounds: Vector2i
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	cells[0] = {
+		0: cell_scene.instantiate()
+	}
+	var center_cell = cells[0][0]
+	add_child(center_cell)
+	cell_size = center_cell.mesh.size
 	spawn_handles()
-	var some_cell = cells[0][0]
-	var displacement_image = get_displacement_image(some_cell)
+	var displacement_image = get_displacement_image(center_cell)
 	displacement_image_bounds = Vector2i(
 		displacement_image.get_width(),
 		displacement_image.get_height()
@@ -193,6 +198,8 @@ func _on_change_height(height_change: float) -> void:
 	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
 
 	var brush_position: Vector2i = compute_brush_position_int(cell_index)
+	
+	print(brush_position)
 	
 	var height: float = abs(height_change) / 50.0 * -1 * sign(height_change)
 

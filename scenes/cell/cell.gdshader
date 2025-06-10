@@ -11,21 +11,25 @@ varying float height;
 
 float sample_height(vec2 uv) {
 	ivec2 texel_size = textureSize(displacement_texture, 0);
-	ivec2 texel_coord = ivec2(round(uv * vec2(texel_size - 1)));
-	return texelFetch(displacement_texture, texel_coord, 0).r;
+	ivec2 iuv = ivec2(
+		int(uv.x * float(texel_size.x - 1)),
+		int(uv.y * float(texel_size.y - 1))
+	);
+	float height_value = texelFetch(displacement_texture, iuv, 0).r;
+	return height_value;
 }
 
 vec3 calculate_normal(vec2 uv) {
 	// Calculate the normal based on the height map.
-	float height_top = sample_height(uv + vec2(sin(0), cos(0)) * normal_sample_scale);
-	float height_right = sample_height(uv + vec2(sin(0.66 * PI), cos(0.66 * PI)) * normal_sample_scale);
-	float height_left = sample_height(uv + vec2(sin(1.33 * PI), cos(1.33 * PI)) * normal_sample_scale);
-
-	vec3 top = vec3(sin(0), height_top, cos(0));
-	vec3 right = vec3(sin(0.66 * PI), height_right, cos(0.66 * PI));
-	vec3 left = vec3(sin(1.33 * PI), height_left, cos(1.33 * PI));
-	vec3 normal = normalize(cross(right - top, left - top));
-	return normal;
+	// float height_top = sample_height(uv + vec2(sin(0), cos(0)) * normal_sample_scale);
+	// float height_right = sample_height(uv + vec2(sin(0.66 * PI), cos(0.66 * PI)) * normal_sample_scale);
+	// float height_left = sample_height(uv + vec2(sin(1.33 * PI), cos(1.33 * PI)) * normal_sample_scale);
+// 
+	// vec3 top = vec3(sin(0), height_top, cos(0));
+	// vec3 right = vec3(sin(0.66 * PI), height_right, cos(0.66 * PI));
+	// vec3 left = vec3(sin(1.33 * PI), height_left, cos(1.33 * PI));
+	// vec3 normal = normalize(cross(right - top, left - top));
+	return vec3(0.0, 1.0, 0.0);
 }
 
 void vertex() {

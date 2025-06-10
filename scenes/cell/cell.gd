@@ -5,7 +5,7 @@ extends MeshInstance3D
 @onready var collision_shape = $Area3D/CollisionShape3D
 
 func generate_flat_image() -> void:
-	var flat_image = Image.create_empty(mesh.subdivide_width + 1, mesh.subdivide_depth + 1, false, Image.FORMAT_RF)
+	var flat_image = Image.create_empty(mesh.subdivide_width + 2, mesh.subdivide_depth + 2, false, Image.FORMAT_RF)
 	var texture = ImageTexture.create_from_image(flat_image)
 	material_override.set("shader_parameter/displacement_texture", texture)
 
@@ -22,7 +22,6 @@ func _process(delta: float) -> void:
 			heightmap_texture = material_override.get("shader_parameter/displacement_texture")
 		var heightmap_image: Image = heightmap_texture.get_image()
 		heightmap_image.convert(Image.FORMAT_RF)
-		heightmap_image.resize(17, 17)
 		var height_map_shape: HeightMapShape3D = collision_shape.shape
 		height_map_shape.update_map_data_from_image(heightmap_image, 0.0, 10.0)
 		is_changed = false

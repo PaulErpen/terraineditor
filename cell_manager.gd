@@ -162,7 +162,8 @@ func get_rect_by_radius(brush_position: Vector2i) -> Rect2:
 		brush_radius * 2,
 		brush_radius * 2
 	)
-	return cell_rect.intersection(brush_rect)
+	return cell_rect.intersection(brush_rect) # this needs to be fixed. even a 0 width/height rect is valid and should yield a single index for painting
+	# only negative rect sizes should be discarded
 
 func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position: Vector2i, height: float) -> void:
 	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
@@ -171,12 +172,8 @@ func paint_on_texture(cell_index: Vector2i, current_brush: Image, brush_position
 
 	var rect: Rect2 = get_rect_by_radius(brush_position)
 
-	if not rect.has_area():
-		print_debug("Brush position is out of bounds: ", brush_position, " for cell index: ", cell_index, " rect = ", rect)
-		return
-
-	for x in range(floor(rect.position.x), ceil(rect.position.x + rect.size.x)):
-		for y in range(floor(rect.position.y), ceil(rect.position.y + rect.size.y)):
+	for x in range(floor(rect.position.x), ceil(rect.position.x + rect.size.x) + 1):
+		for y in range(floor(rect.position.y), ceil(rect.position.y + rect.size.y) + 1):
 			if x < 0 or x >= displacement_image_bounds.x or y < 0 or y >= displacement_image_bounds.y:
 				continue
 			var current_height: float = displacement_image.get_pixelv(Vector2i(x, y)).r

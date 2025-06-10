@@ -52,7 +52,13 @@ func spawn_handles():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	pass
+	for x in cells.keys():
+		for y in cells[x].keys():
+			var current_cell: Node3D = cells[x][y]
+			
+			current_cell.material_override.set("shader_parameter/brush_radius", brush_radius)
+			var brush_pos: Vector2 = Vector2(compute_brush_position_int(Vector2i(x, y))) / Vector2(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
+			current_cell.material_override.set("shader_parameter/brush_position", brush_pos)
 
 func _on_create_new_cell(cell_position: Vector2i) -> void:
 	if cell_position.x not in cells:
@@ -177,13 +183,16 @@ func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
 		Vector2i(cell_index.x - 1, cell_index.y + 1)
 	]
 
-func _on_change_height(height_change: float) -> void:
-	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
-
-	var brush_position: Vector2i = Vector2i(
+func compute_brush_position_int(cell_index: Vector2i) -> Vector2i:
+	return Vector2i(
 		round((bursh_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
 		round((bursh_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
 	)
+
+func _on_change_height(height_change: float) -> void:
+	var cell_index: Vector2i = get_cell_index_from_position(bursh_cursor.position)
+
+	var brush_position: Vector2i = compute_brush_position_int(cell_index)
 	
 	var height: float = abs(height_change) / 50.0 * -1 * sign(height_change)
 

@@ -1,10 +1,13 @@
 shader_type spatial;
 
+uniform float brush_radius = 3.0;
+uniform vec2 brush_position = vec2(0.0);
+
 uniform float height_scale = 10.0;
 uniform sampler2D displacement_texture;
 uniform float normal_sample_scale = 0.02;
 
-varying vec3 normal_buff;
+varying float height;
 
 float sample_height(vec2 uv) {
 	ivec2 texel_size = textureSize(displacement_texture, 0);
@@ -27,17 +30,24 @@ vec3 calculate_normal(vec2 uv) {
 
 void vertex() {
 	// Called for every vertex the material is visible on.
-	float height = sample_height(UV);
+	height = sample_height(UV);
 
 	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, VERTEX.y + height * height_scale, VERTEX.z, 1.0);
 
     NORMAL = calculate_normal(UV);
-
-	normal_buff = vec3(height);
 }
 
 void fragment() {
-	ALBEDO = (normal_buff.rgb + 1.0) / 2.0;
+	float dist = distance(UV, brush_position);
+	float scaled_radius = brush_radius / float(textureSize(displacement_texture, 0).x);
+	
+	float height_color = (height + 1.0) / 2.0;
+	
+	if (scaled_radius < dist && dist < scaled_radius + 0.01) {
+		ALBEDO = vec3(clamp(1.0 + height_color, 0.0, 1.0));
+	} else {
+		ALBEDO = vec3(height_color);
+	}
 }
 
 //void light() {

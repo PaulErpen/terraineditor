@@ -61,11 +61,11 @@ func spawn_handles():
 func _process(_delta: float) -> void:
 	for x in cells.keys():
 		for y in cells[x].keys():
-			var current_cell: Node3D = cells[x][y]
+			var current_cell: Cell = cells[x][y]
 			
-			current_cell.material_override.set("shader_parameter/brush_radius", brush_radius)
+			current_cell.set_brush_radius(brush_radius)
 			var brush_pos: Vector2 = Vector2(compute_brush_position_int(Vector2i(x, y))) / Vector2(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
-			current_cell.material_override.set("shader_parameter/brush_position", brush_pos)
+			current_cell.set_brush_position(brush_pos)
 
 func _on_create_new_cell(cell_position: Vector2i) -> void:
 	if cell_position.x not in cells:
@@ -98,14 +98,14 @@ func stitch_seams(cell_position: Vector2i) -> void:
 					collected_heights.append(height_data)
 	
 	if collected_heights.size() > 0:
-		var current_cell: Node3D = cells[cell_position.x][cell_position.y]
+		var current_cell: Cell = cells[cell_position.x][cell_position.y]
 		var displacement_image: Image = get_displacement_image(current_cell)
 		
 		for height_data in collected_heights:
 			displacement_image.set_pixelv(height_data.position, Color(height_data.height, height_data.height, height_data.height))
 		
-		var new_texture = ImageTexture.create_from_image(displacement_image)
-		current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)
+		var new_texture: ImageTexture = ImageTexture.create_from_image(displacement_image)
+		current_cell.set_displacement_texture(new_texture)
 		current_cell.is_changed = true
 
 func _on_move_brush_curser(brush_cursor_position: Vector3) -> void:
@@ -128,7 +128,7 @@ func get_rect_by_radius(brush_position: Vector2i) -> InclusiveRect:
 	return cell_rect.intersection(brush_rect)
 
 func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: float) -> void:
-	var current_cell: Node3D = cells[cell_index.x][cell_index.y]
+	var current_cell: Cell = cells[cell_index.x][cell_index.y]
 	current_cell.is_changed = true
 	var displacement_image: Image = get_displacement_image(current_cell)
 
@@ -143,11 +143,11 @@ func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: fl
 			var new_height: float = current_height + height * influence
 			displacement_image.set_pixelv(Vector2i(x, y), Color(new_height, new_height, new_height))
 
-	var new_texture = ImageTexture.create_from_image(displacement_image)
-	current_cell.material_override.set("shader_parameter/displacement_texture", new_texture)
+	var new_texture: ImageTexture = ImageTexture.create_from_image(displacement_image)
+	current_cell.set_displacement_texture(new_texture)
 
-func get_displacement_image(cell: Node3D) -> Image:
-	var displacement_texure: Texture2D = cell.material_override.get("shader_parameter/displacement_texture")
+func get_displacement_image(cell: Cell) -> Image:
+	var displacement_texure: Texture = cell.get_displacement_texture()
 	var displacement_image: Image = displacement_texure.get_image()
 	return displacement_image
 

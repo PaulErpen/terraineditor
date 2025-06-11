@@ -41,7 +41,6 @@ map_data = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 material_override = SubResource("ShaderMaterial_a8sli")
 mesh = SubResource("PlaneMesh_p0bd4")
 script = ExtResource("2_rcqrr")
-is_changed = false
 
 [node name="Area3D" type="Area3D" parent="."]
 collision_layer = 2

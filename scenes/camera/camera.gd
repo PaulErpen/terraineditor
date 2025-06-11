@@ -3,6 +3,8 @@ extends Node3D
 signal change_height(height_change: float)
 signal change_brush_radius(radius_change: float)
 signal move_brush_cursor(brush_cursor_pos: Vector3)
+signal save_signal
+signal load_signal
 
 @export var rotation_speed: float = 0.01
 @export var camera_speed: float = 10.0
@@ -21,15 +23,21 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var movement_direction: Vector3 = Vector3.ZERO
 
-	if Input.is_action_pressed("forward"):
-		movement_direction -= basis.z
-	if Input.is_action_pressed("backward"):
-		movement_direction += basis.z
-	if Input.is_action_pressed("left"):
-		movement_direction -= basis.x
-	if Input.is_action_pressed("right"):
-		movement_direction += basis.x
-	
+	if not Input.is_action_pressed("control"):
+		if Input.is_action_pressed("forward"):
+			movement_direction -= basis.z
+		if Input.is_action_pressed("backward"):
+			movement_direction += basis.z
+		if Input.is_action_pressed("left"):
+			movement_direction -= basis.x
+		if Input.is_action_pressed("right"):
+			movement_direction += basis.x
+	else:
+		if Input.is_action_just_pressed("backward"):
+			save_signal.emit()
+		if Input.is_action_just_pressed("load"):
+			load_signal.emit()
+		
 	if movement_direction != Vector3.ZERO:
 		movement_direction.y = 0
 		movement_direction = movement_direction.normalized() * camera_speed

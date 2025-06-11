@@ -232,3 +232,56 @@ func change_height(height_change: float) -> void:
 	for neighbor in neighbors:
 		if cell_exists(neighbor.x, neighbor.y):
 			stitch_seams(neighbor)
+
+func save_to_file() -> void:
+	var file: FileAccess = FileAccess.open("./saved_terrains/example.tes", FileAccess.WRITE)
+
+	for x in cells.keys():
+		for y in cells[x].keys():
+			var current_cell: Cell = cells[x][y]
+			var displacement_texture: ImageTexture = current_cell.get_displacement_texture()
+
+			file.store_32(x)
+			file.store_32(y)
+			var image = displacement_texture.get_image()
+			image.convert(Image.FORMAT_RF)
+			var data: PackedByteArray = image.get_data()
+			file.store_buffer(data)
+			
+			assert(data.size() == (current_cell.get_texture_bounds().x * current_cell.get_texture_bounds().y * 4))
+			
+	
+	file.close()
+
+func load_from_file() -> void:
+	var file: FileAccess = FileAccess.open("./saved_terrains/example.tes", FileAccess.READ)
+	
+	for x in cells.keys():
+		for y in cells[x].keys():
+			var current_cell: Cell = cells[x][y]
+			current_cell.queue_free()
+	cells = {}
+
+	while file.get_position() < file.get_length():
+		var x: int = file.get_32()
+		var y: int = file.get_32()
+
+		if not cell_exists(x, y):
+			_on_create_new_cell(Vector2i(x, y))
+		
+		var current_cell: Cell = cells[x][y]
+		
+		var texture_bounds = current_cell.get_texture_bounds()
+		var data: PackedByteArray = file.get_buffer(texture_bounds.x * texture_bounds.y * 4) # 4 bytes per pixel (RF format)
+		
+		
+		var displacement_image: Image = Image.create_from_data(
+			texture_bounds.x,
+			texture_bounds.y,
+			false,
+			Image.FORMAT_RF,
+			data
+		)
+		
+		var new_texture: ImageTexture = ImageTexture.create_from_image(displacement_image)
+		current_cell.set_displacement_texture(new_texture)

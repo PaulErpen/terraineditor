@@ -31,4 +31,6 @@ transform = Transform3D(1, 0, 0, 0, 0.998268, 0.058836, 0, -0.058836, 0.998268, 
 
 [connection signal="change_brush_radius" from="Camera" to="." method="_on_camera_change_brush_radius"]
 [connection signal="change_height" from="Camera" to="." method="_on_camera_change_height"]
+[connection signal="load_signal" from="Camera" to="." method="_on_camera_load_signal"]
 [connection signal="move_brush_cursor" from="Camera" to="." method="_on_camera_move_brush_cursor"]
+[connection signal="save_signal" from="Camera" to="." method="_on_camera_save_signal"]

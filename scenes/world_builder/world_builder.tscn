@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://b02a3f4oxq14i"]
+[gd_scene load_steps=8 format=3 uid="uid://b02a3f4oxq14i"]
 
 [ext_resource type="Script" path="res://scenes/world_builder/world_builder.gd" id="1_4l545"]
 [ext_resource type="PackedScene" uid="uid://xqonh80jxl4i" path="res://scenes/camera/camera.tscn" id="2_jic8v"]
 [ext_resource type="PackedScene" uid="uid://efb3nrmeanbb" path="res://scenes/cell_manager/cell_manager.tscn" id="3_bd45h"]
+[ext_resource type="PackedScene" uid="uid://c6myw0gk1dx6i" path="res://scenes/ui/ui.tscn" id="4_pcy7f"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_s4a3r"]
 
@@ -29,8 +30,10 @@ transform = Transform3D(1, 0, 0, 0, 0.998268, 0.058836, 0, -0.058836, 0.998268, 
 
 [node name="CellManager" parent="." instance=ExtResource("3_bd45h")]
 
+[node name="Ui" parent="." instance=ExtResource("4_pcy7f")]
+
 [connection signal="change_brush_radius" from="Camera" to="." method="_on_camera_change_brush_radius"]
 [connection signal="change_height" from="Camera" to="." method="_on_camera_change_height"]
-[connection signal="load_signal" from="Camera" to="." method="_on_camera_load_signal"]
 [connection signal="move_brush_cursor" from="Camera" to="." method="_on_camera_move_brush_cursor"]
-[connection signal="save_signal" from="Camera" to="." method="_on_camera_save_signal"]
+[connection signal="on_load_file_selected" from="Ui" to="." method="_on_ui_on_load_file_selected"]
+[connection signal="on_save_file_selected" from="Ui" to="." method="_on_ui_on_save_file_selected"]

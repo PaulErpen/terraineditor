@@ -233,8 +233,8 @@ func change_height(height_change: float) -> void:
 		if cell_exists(neighbor.x, neighbor.y):
 			stitch_seams(neighbor)
 
-func save_to_file() -> void:
-	var file: FileAccess = FileAccess.open("./saved_terrains/example.tes", FileAccess.WRITE)
+func save_to_file(path: String) -> void:
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 
 	for x in cells.keys():
 		for y in cells[x].keys():
@@ -253,8 +253,8 @@ func save_to_file() -> void:
 	
 	file.close()
 
-func load_from_file() -> void:
-	var file: FileAccess = FileAccess.open("./saved_terrains/example.tes", FileAccess.READ)
+func load_from_file(path: String) -> void:
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	
 	for x in cells.keys():
 		for y in cells[x].keys():

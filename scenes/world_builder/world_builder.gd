@@ -21,8 +21,10 @@ func _on_camera_change_height(height_change: float) -> void:
 func _on_camera_move_brush_cursor(brush_cursor_pos: Vector3) -> void:
 	cell_manager.move_brush_cursor(brush_cursor_pos)
 
-func _on_camera_load_signal() -> void:
-	cell_manager.load_from_file()
 
-func _on_camera_save_signal() -> void:
-	cell_manager.save_to_file()
+func _on_ui_on_load_file_selected(path: String) -> void:
+	cell_manager.load_from_file(path)
+
+
+func _on_ui_on_save_file_selected(path: String) -> void:
+	cell_manager.save_to_file(path)

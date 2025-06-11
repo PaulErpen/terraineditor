@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6myw0gk1dx6i"]
+
+[ext_resource type="Script" path="res://scenes/ui/ui.gd" id="1_137i7"]
+
+[node name="Ui" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_137i7")
+
+[node name="TopMenu" type="MenuBar" parent="."]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 40.0
+offset_bottom = 36.0
+
+[node name="FileMenu" type="PopupMenu" parent="TopMenu"]
+title = "Hello"
+allow_search = false
+item_count = 2
+item_0/text = "Load"
+item_1/text = "Save as..."
+item_1/id = 1
+
+[node name="SaveFileDialog" type="FileDialog" parent="."]
+mode = 2
+title = "Save terrain"
+initial_position = 1
+size = Vector2i(500, 500)
+filters = PackedStringArray("*.tes")
+
+[node name="LoadFileDialog" type="FileDialog" parent="."]
+auto_translate_mode = 1
+title = "Open a File"
+initial_position = 1
+size = Vector2i(500, 500)
+ok_button_text = "Open"
+file_mode = 0
+filters = PackedStringArray("*.tes")
+
+[connection signal="id_pressed" from="TopMenu/FileMenu" to="." method="_on_file_menu_id_pressed"]
+[connection signal="file_selected" from="SaveFileDialog" to="." method="_on_save_file_dialog_file_selected"]
+[connection signal="file_selected" from="LoadFileDialog" to="." method="_on_load_file_dialog_file_selected"]

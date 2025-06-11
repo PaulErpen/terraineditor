@@ -24,7 +24,7 @@ vec3 calculate_normal(vec2 uv) {
 	// float height_top = sample_height(uv + vec2(sin(0), cos(0)) * normal_sample_scale);
 	// float height_right = sample_height(uv + vec2(sin(0.66 * PI), cos(0.66 * PI)) * normal_sample_scale);
 	// float height_left = sample_height(uv + vec2(sin(1.33 * PI), cos(1.33 * PI)) * normal_sample_scale);
-// 
+//
 	// vec3 top = vec3(sin(0), height_top, cos(0));
 	// vec3 right = vec3(sin(0.66 * PI), height_right, cos(0.66 * PI));
 	// vec3 left = vec3(sin(1.33 * PI), height_left, cos(1.33 * PI));
@@ -44,9 +44,9 @@ void vertex() {
 void fragment() {
 	float dist = distance(UV, brush_position);
 	float scaled_radius = brush_radius / float(textureSize(displacement_texture, 0).x);
-	
+
 	float height_color = (height + 1.0) / 2.0;
-	
+
 	if (scaled_radius < dist && dist < scaled_radius + 0.01) {
 		ALBEDO = vec3(clamp(1.0 + height_color, 0.0, 1.0));
 	} else {

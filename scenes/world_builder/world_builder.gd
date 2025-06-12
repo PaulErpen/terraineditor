@@ -11,7 +11,6 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	pass
 
-
 func _on_camera_change_brush_radius(radius_change: float) -> void:
 	cell_manager.change_brush_radius(radius_change)
 

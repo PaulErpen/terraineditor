@@ -27,3 +27,6 @@ func _on_ui_on_load_file_selected(path: String) -> void:
 
 func _on_ui_on_save_file_selected(path: String) -> void:
 	cell_manager.save_to_file(path)
+
+func _on_ui_change_brush_type(brush_type: Brush.BrushType) -> void:
+	cell_manager.brush_type = brush_type

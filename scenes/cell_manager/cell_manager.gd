@@ -3,6 +3,7 @@ extends Node3D
 class_name CellManager
 
 @export var brush_radius: float = 3.0
+var brush_type: Brush.BrushType = Brush.BrushType.Linear
 
 var handle_scene = preload("res://scenes/create_new_handle/create_new_handle.tscn")
 var cell_scene = preload("res://scenes/cell/cell.tscn")
@@ -139,7 +140,12 @@ func paint_on_texture(cell_index: Vector2i, brush_position: Vector2i, height: fl
 			if x < 0 or x >= displacement_image_bounds.x or y < 0 or y >= displacement_image_bounds.y:
 				continue
 			var current_height: float = displacement_image.get_pixelv(Vector2i(x, y)).r
-			var influence: float = max(0.01, 1.0 - (Vector2(x, y).distance_to(brush_position) / brush_radius))
+			var influence: float = Brush.compute_influence(
+				Vector2(x, y),
+				Vector2(brush_position.x, brush_position.y),
+				brush_radius,
+				brush_type
+			)
 			var new_height: float = current_height + height * influence
 			displacement_image.set_pixelv(Vector2i(x, y), Color(new_height, new_height, new_height))
 

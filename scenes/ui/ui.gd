@@ -2,6 +2,7 @@ extends Control
 
 signal on_save_file_selected(path: String)
 signal on_load_file_selected(path: String)
+signal change_brush_type(brush_type: Brush.BrushType)
 
 @onready var save_file_dialog: FileDialog = $SaveFileDialog
 @onready var load_file_dialog: FileDialog = $LoadFileDialog
@@ -29,3 +30,7 @@ func _on_save_file_dialog_file_selected(path: String) -> void:
 
 func _on_load_file_dialog_file_selected(path: String) -> void:
 	on_load_file_selected.emit(path)
+
+
+func _on_brush_selector_change_brush_type(brush_type: Brush.BrushType) -> void:
+	change_brush_type.emit(brush_type)

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://c6myw0gk1dx6i"]
+[gd_scene load_steps=3 format=3 uid="uid://c6myw0gk1dx6i"]
 
 [ext_resource type="Script" path="res://scenes/ui/ui.gd" id="1_137i7"]
+[ext_resource type="PackedScene" uid="uid://dpc2wdvjhcjvm" path="res://scenes/brush_selector/brush_selector.tscn" id="2_ypb4r"]
 
 [node name="Ui" type="Control"]
 layout_mode = 3
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 script = ExtResource("1_137i7")
 
 [node name="TopMenu" type="MenuBar" parent="."]
@@ -42,6 +44,10 @@ ok_button_text = "Open"
 file_mode = 0
 filters = PackedStringArray("*.tes")
 
+[node name="BrushSelector" parent="." instance=ExtResource("2_ypb4r")]
+layout_mode = 1
+
 [connection signal="id_pressed" from="TopMenu/FileMenu" to="." method="_on_file_menu_id_pressed"]
 [connection signal="file_selected" from="SaveFileDialog" to="." method="_on_save_file_dialog_file_selected"]
 [connection signal="file_selected" from="LoadFileDialog" to="." method="_on_load_file_dialog_file_selected"]
+[connection signal="change_brush_type" from="BrushSelector" to="." method="_on_brush_selector_change_brush_type"]

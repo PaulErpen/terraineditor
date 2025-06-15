@@ -12,8 +12,8 @@ varying float height;
 float sample_height(vec2 uv) {
 	ivec2 texel_size = textureSize(displacement_texture, 0);
 	ivec2 iuv = ivec2(
-		int(round(uv.x * float(texel_size.x - 1))),
-		int(round(uv.y * float(texel_size.y - 1)))
+		int(round(1.0 + uv.x * float(texel_size.x - 3))),
+		int(round(1.0 + uv.y * float(texel_size.y - 3)))
 	);
 	float height_value = texelFetch(displacement_texture, iuv, 0).r;
 	return height_value;

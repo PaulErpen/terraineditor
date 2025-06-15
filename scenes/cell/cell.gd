@@ -12,7 +12,7 @@ func generate_flat_image() -> void:
 	set_displacement_texture(texture)
 
 func get_texture_bounds() -> Vector2i:
-	return Vector2i(mesh.subdivide_width + 2, mesh.subdivide_depth + 2)
+	return Vector2i(mesh.subdivide_width + 4, mesh.subdivide_depth + 4)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -39,7 +39,12 @@ func get_displacement_texture() -> ImageTexture:
 	return heightmap_texture
 
 func set_collision_shape_texture(texture: ImageTexture) -> void:
-	var heightmap_image: Image = texture.get_image()
+	var bounds = get_texture_bounds()
+	var heightmap_image: Image = texture.get_image().get_region(Rect2i(
+		1, 1, bounds.x - 2, bounds.y - 2
+	))
+	if not heightmap_image.get_size().x == 14:
+		print_debug("Heightmap image bounds differ from expected: ", heightmap_image.get_size().x, " != 14")
 	heightmap_image.convert(Image.FORMAT_RF)
 	var height_map_shape: HeightMapShape3D = collision_shape.shape
 	height_map_shape.update_map_data_from_image(heightmap_image, 0.0, 10.0)

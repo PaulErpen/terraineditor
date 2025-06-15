@@ -34,8 +34,8 @@ static func collect_pixels_from_neighbor_seam(neighbor_heightmap: Image, offset:
 			for y in [0, 1]:
 				var corner_coords = GeometryUtil.get_corner_coords_from_offset(offset, neighbor_heightmap.get_width() - 1, neighbor_heightmap.get_height() - 1)
 
-				corner_coords.x = corner_coords.x + (x if offset.x == 0 else -x)
-				corner_coords.y = corner_coords.y + (y if offset.y == 0 else -y)
+				corner_coords.x = corner_coords.x + (x if corner_coords.x == 0 else -x)
+				corner_coords.y = corner_coords.y + (y if corner_coords.y == 0 else -y)
 
 				var pixel_color: Color = neighbor_heightmap.get_pixelv(corner_coords)
 				collected_heights.append(

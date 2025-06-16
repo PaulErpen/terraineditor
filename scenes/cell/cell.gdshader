@@ -8,6 +8,7 @@ uniform sampler2D displacement_texture;
 uniform float normal_sample_scale = 5.0;
 
 varying float height;
+varying vec2 tex_uv;
 
 float sample_height(ivec2 iuv) {
 	float height_value = texelFetch(displacement_texture, iuv, 0).r;
@@ -43,16 +44,19 @@ void vertex() {
 	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, VERTEX.y + height * height_scale, VERTEX.z, 1.0);
 
     NORMAL = calculate_normal(iuv);
+
+	float size = float(textureSize(displacement_texture, 0).x - 1);
+	tex_uv = vec2(float(iuv.x), float(iuv.y)) / size;
 }
 
 void fragment() {
-	float dist = distance(UV, brush_position);
-	float scaled_radius = brush_radius / float(textureSize(displacement_texture, 0).x);
+	float dist = distance(tex_uv, brush_position);
+	float scaled_radius = brush_radius / float(textureSize(displacement_texture, 0).x - 3);
 
 	float height_color = (height + 1.0) / 2.0;
 
 	if (scaled_radius < dist && dist < scaled_radius + 0.01) {
-		ALBEDO = vec3(clamp(1.0 + height_color, 0.0, 1.0));
+		ALBEDO = vec3(clamp(0.0, 0.0, 0.0));
 	} else {
 		ALBEDO = vec3(1.0);
 	}

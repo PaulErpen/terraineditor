@@ -15,7 +15,7 @@ static func compute_influence(current_pos: Vector2, brush_pos: Vector2, brush_ra
 
     match brush_type:
         BrushType.Linear:
-            return max(0.01, 1.0 - (distance / brush_radius))
+            return max(0.00, 1.0 - (distance / brush_radius))
         BrushType.Round:
             return 1.0 - (distance / brush_radius) ** 2
         BrushType.Gaussian:

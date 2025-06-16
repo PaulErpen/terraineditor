@@ -65,7 +65,7 @@ func _process(_delta: float) -> void:
 			var current_cell: Cell = cells[x][y]
 			
 			current_cell.set_brush_radius(brush_radius)
-			var brush_pos: Vector2 = Vector2(compute_brush_position_int(Vector2i(x, y))) / Vector2(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
+			var brush_pos: Vector2 = Vector2(compute_brush_position_int(Vector2i(x, y))) / Vector2(displacement_image_bounds.x - 1, displacement_image_bounds.y - 1) # this might also need adjustment based on padding
 			current_cell.set_brush_position(brush_pos)
 
 func _on_create_new_cell(cell_position: Vector2i) -> void:
@@ -159,12 +159,14 @@ func get_displacement_image(cell: Cell) -> Image:
 
 func get_closest_point_by_offset(brush_position: Vector2i, offset: Vector2i) -> Vector2:
 	if offset.x == 0:
-		return Vector2(brush_position.x, 0 if offset.y < 0 else displacement_image_bounds.y - 1)
+		return Vector2(brush_position.x, 2 if offset.y < 0 else displacement_image_bounds.y - 3)
 	elif offset.y == 0:
-		return Vector2(0 if offset.x < 0 else displacement_image_bounds.x - 1, brush_position.y)
+		return Vector2(2 if offset.x < 0 else displacement_image_bounds.x - 3, brush_position.y)
 	elif offset.x != 0 and offset.y != 0:
-		var corner_coords = GeometryUtil.get_corner_coords_from_offset(offset, displacement_image_bounds.x - 1, displacement_image_bounds.y - 1)
-		return Vector2(displacement_image_bounds.x - 1 - corner_coords.x, displacement_image_bounds.y - 1 - corner_coords.y)
+		return Vector2(
+			2 if offset.x < 0 else displacement_image_bounds.x - 3,
+			2 if offset.y < 0 else displacement_image_bounds.y - 3
+		)
 	else:
 		print_debug("Unsupported offset for closest point calculation: ", offset)
 		return Vector2(0, 0)
@@ -177,6 +179,8 @@ func brush_position_intersects_with_neighbor(current_cell_index: Vector2i, brush
 	var closest_point: Vector2 = get_closest_point_by_offset(brush_position, offset)
 
 	var distance: float = closest_point.distance_to(brush_position)
+
+	print("Point:", closest_point, " Brush pos: ", brush_position)
 
 	if distance <= brush_radius:
 		return true
@@ -198,21 +202,21 @@ func get_possible_neighbors(cell_index: Vector2i) -> Array[Vector2i]:
 
 func compute_brush_position_int(cell_index: Vector2i) -> Vector2i:
 	return Vector2i(
-		round((brush_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 1)) - cell_index.x * (displacement_image_bounds.x - 1),
-		round((brush_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 1)) - cell_index.y * (displacement_image_bounds.y - 1)
+		round(1 + (brush_cursor.position.x + cell_size.x * 0.5) / cell_size.x * (displacement_image_bounds.x - 3)) - cell_index.x * (displacement_image_bounds.x - 3),
+		round(1 + (brush_cursor.position.z + cell_size.y * 0.5) / cell_size.y * (displacement_image_bounds.y - 3)) - cell_index.y * (displacement_image_bounds.y - 3)
 	)
 
 func move_brush_cursor(brush_cursor_pos: Vector3) -> void:
 	brush_cursor.position = brush_cursor_pos
 
 func change_brush_radius(radius_change) -> void:
-	brush_radius = clamp(brush_radius + radius_change, 0.1, displacement_image_bounds.x - 1)
+	brush_radius = clamp(brush_radius + radius_change, 0.1, displacement_image_bounds.x - 1) # might also need padding adjustment
 
 func change_height(height_change: float) -> void:
 	var cell_index: Vector2i = get_cell_index_from_position(brush_cursor.position)
 
 	var brush_position: Vector2i = compute_brush_position_int(cell_index)
-	
+
 	print(brush_position)
 	
 	var height: float = abs(height_change) / 50.0 * -1 * sign(height_change)
@@ -227,17 +231,18 @@ func change_height(height_change: float) -> void:
 				paint_on_texture(
 					neighbor,
 					Vector2i(
-						brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 1),
-						brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 1)
+						brush_position.x - (neighbor.x - cell_index.x) * (displacement_image_bounds.x - 3), # padding adjustment
+						brush_position.y - (neighbor.y - cell_index.y) * (displacement_image_bounds.y - 3)
 					),
 					height
 				)
 
-	stitch_seams(cell_index)
+	# stitch_seams(cell_index)
 
 	for neighbor in neighbors:
 		if cell_exists(neighbor.x, neighbor.y):
-			stitch_seams(neighbor)
+			# stitch_seams(neighbor)
+			pass
 
 func save_to_file(path: String) -> void:
 	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
